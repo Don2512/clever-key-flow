@@ -3,8 +3,11 @@ import SearchHeader from '@/components/SearchHeader';
 import JobMap from '@/components/JobMap';
 import JobCard from '@/components/JobCard';
 import JobDetailsDialog from '@/components/JobDetailsDialog';
+import PostJobDialog from '@/components/PostJobDialog';
 import { jobsData, Job } from '@/data/jobsData';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 const Index = () => {
   const [jobSearch, setJobSearch] = useState('');
