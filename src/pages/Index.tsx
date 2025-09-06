@@ -102,7 +102,7 @@ const Index = () => {
 
       <JobDetailsDialog job={selectedJob} open={open} onOpenChange={setOpen} />
       <PostJobDialog open={openCreate} onOpenChange={setOpenCreate} />
-      <ChatbotWidget />
+      <ChatbotWidget onPick={handleJobFocus} />
 
       <Button onClick={() => setOpenCreate(true)} className="fixed bottom-6 right-6 rounded-full h-12 w-12 p-0 shadow-lg" aria-label="Tạo tin tuyển dụng">
         <Plus className="h-6 w-6" />
