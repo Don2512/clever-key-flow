@@ -8,6 +8,7 @@ import { jobsData, Job } from '@/data/jobsData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import ChatbotWidget from '@/components/ChatbotWidget';
 
 const Index = () => {
   const [jobSearch, setJobSearch] = useState('');
@@ -76,7 +77,7 @@ const Index = () => {
               {filteredJobs.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground">
-                    Không tìm thấy việc làm phù hợp
+                    Không t��m thấy việc làm phù hợp
                   </p>
                 </div>
               )}
