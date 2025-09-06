@@ -30,9 +30,14 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground">18 việc làm</span>
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-2"
+              onClick={() => window.location.href = '/recruiter'}
+            >
               <User className="w-4 h-4" />
-              User
+              Nhà tuyển dụng
             </Button>
           </div>
         </div>
