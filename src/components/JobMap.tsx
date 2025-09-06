@@ -59,6 +59,15 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId }) => 
     // Add navigation controls
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
+    // Suppress benign abort errors from tile requests when panning/zooming
+    map.current.on('error', (e: any) => {
+      const name = e?.error?.name || '';
+      const message = e?.error?.message || '';
+      if (/AbortError/i.test(name) || /aborted/i.test(message)) {
+        e.preventDefault?.();
+      }
+    });
+
     // Cleanup function
     return () => {
       if (map.current) {
