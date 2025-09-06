@@ -9,6 +9,10 @@ import RecruiterJobs from "./pages/RecruiterJobs";
 import RecruiterApplications from "./pages/RecruiterApplications";
 import RecruiterCandidates from "./pages/RecruiterCandidates";
 import RecruiterManage from "./pages/RecruiterManage";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminCompanies from "./pages/AdminCompanies";
+import AdminPosts from "./pages/AdminPosts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
