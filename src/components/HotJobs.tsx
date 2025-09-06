@@ -27,11 +27,7 @@ const HotJobs: React.FC<HotJobsProps> = ({ onSelect }) => {
     if (!emblaApi) return;
     const id = setInterval(() => {
       if (pauseRef.current) return;
-      const last = emblaApi.scrollSnapList().length - 1;
-      const cur = emblaApi.selectedScrollSnap();
-      if (cur === last) dirRef.current = -1;
-      if (cur === 0) dirRef.current = 1;
-      dirRef.current === 1 ? emblaApi.scrollNext() : emblaApi.scrollPrev();
+      emblaApi.scrollNext();
     }, 1800);
     return () => clearInterval(id);
   }, [emblaApi]);
