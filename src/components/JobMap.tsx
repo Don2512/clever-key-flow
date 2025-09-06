@@ -16,13 +16,26 @@ interface JobMapProps {
   jobs: Job[];
   onJobSelect: (job: Job) => void;
   selectedJobId?: string;
+  getMetric?: (job: Job) => number; // optional metric (e.g., views) used to scale marker size
+  metricLabel?: string;
+  showLegend?: boolean;
 }
 
-const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId }) => {
+const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId, getMetric, metricLabel = 'Views', showLegend = false }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<{ [key: string]: mapboxgl.Marker }>({});
   const popups = useRef<{ [key: string]: mapboxgl.Popup }>({});
+
+  const metrics = useMemo(() => {
+    if (!getMetric) return null;
+    const values = jobs.map(j => getMetric(j));
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const byId: Record<string, number> = {};
+    jobs.forEach((j, i) => { byId[j.id] = values[i]; });
+    return { min, max, byId };
+  }, [jobs, getMetric]);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -87,16 +100,31 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId }) => 
     // Add markers for each job
     jobs.forEach(job => {
       const markerElement = document.createElement('div');
-      markerElement.className = `w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-lg ${
+
+      // Compute size by metric when provided
+      const base = 28; // default diameter
+      let diameter = base;
+      let titleContent = job.company.charAt(0).toUpperCase();
+      let metricVal: number | undefined;
+      if (metrics) {
+        metricVal = metrics.byId[job.id];
+        const { min, max } = metrics;
+        const minD = 16, maxD = 44;
+        const span = Math.max(1, max - min);
+        diameter = Math.round(minD + ((metricVal - min) / span) * (maxD - minD));
+        titleContent = String(metricVal);
+      }
+
+      markerElement.className = `rounded-full cursor-pointer border-2 border-white shadow-lg ${
         selectedJobId === job.id
           ? 'bg-job-marker-hover'
           : 'bg-job-marker'
       }`;
-      
-      // Add company initial or job type indicator
-      markerElement.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white text-xs font-bold">${
-        job.company.charAt(0).toUpperCase()
-      }</div>`;
+      markerElement.style.width = `${diameter}px`;
+      markerElement.style.height = `${diameter}px`;
+
+      // Add label
+      markerElement.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white text-[10px] font-bold">${titleContent}</div>`;
 
       markerElement.addEventListener('click', () => {
         onJobSelect(job);
@@ -116,6 +144,7 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId }) => 
           <h3 class="font-semibold text-sm">${job.title}</h3>
           <p class="text-xs text-muted-foreground">${job.company}</p>
           <p class="text-xs font-medium text-primary">${job.salary}</p>
+          ${metrics ? `<p class='text-[11px] mt-1'>${metricLabel}: <span class='font-semibold'>${metrics.byId[job.id]}</span></p>` : ''}
         </div>
       `);
 
@@ -156,6 +185,19 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId }) => 
 
   return (
     <div className="relative w-full h-full">
+      {metrics && showLegend && (
+        <div className="absolute left-2 top-2 z-10 rounded-md border bg-card/90 backdrop-blur p-2 text-[11px]">
+          <div className="font-medium mb-1">{metricLabel}</div>
+          <div className="flex items-end gap-2">
+            <div className="bg-[hsl(var(--job-marker))] rounded-full" style={{ width: 12, height: 12 }} />
+            <div className="bg-[hsl(var(--job-marker))] rounded-full" style={{ width: 22, height: 22 }} />
+            <div className="bg-[hsl(var(--job-marker))] rounded-full" style={{ width: 36, height: 36 }} />
+          </div>
+          <div className="mt-1 flex justify-between text-muted-foreground">
+            <span>Thấp</span><span>Cao</span>
+          </div>
+        </div>
+      )}
       <div ref={mapContainer} className="absolute inset-0" />
     </div>
   );
