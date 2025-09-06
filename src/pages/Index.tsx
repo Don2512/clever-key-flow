@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import SearchHeader from '@/components/SearchHeader';
 import JobMap from '@/components/JobMap';
 import JobCard from '@/components/JobCard';
+import JobDetailsDialog from '@/components/JobDetailsDialog';
 import { jobsData, Job } from '@/data/jobsData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -9,27 +10,30 @@ const Index = () => {
   const [jobSearch, setJobSearch] = useState('');
   const [locationSearch, setLocationSearch] = useState('');
   const [selectedJobId, setSelectedJobId] = useState<string | undefined>();
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [open, setOpen] = useState(false);
 
   const filteredJobs = useMemo(() => {
     return jobsData.filter(job => {
-      const matchesJob = jobSearch === '' || 
+      const matchesJob = jobSearch === '' ||
         job.title.toLowerCase().includes(jobSearch.toLowerCase()) ||
         job.company.toLowerCase().includes(jobSearch.toLowerCase()) ||
         job.description?.toLowerCase().includes(jobSearch.toLowerCase());
-      
+
       const matchesLocation = locationSearch === '' ||
         job.location.toLowerCase().includes(locationSearch.toLowerCase());
-      
+
       return matchesJob && matchesLocation;
     });
   }, [jobSearch, locationSearch]);
 
   const handleJobSelect = (job: Job) => {
     setSelectedJobId(job.id);
+    setSelectedJob(job);
+    setOpen(true);
   };
 
   const handleSearch = () => {
-    // Search is performed automatically via filteredJobs
     console.log('Searching for:', { jobSearch, locationSearch });
   };
 
@@ -42,7 +46,7 @@ const Index = () => {
         onLocationSearchChange={setLocationSearch}
         onSearch={handleSearch}
       />
-      
+
       <div className="flex-1 flex">
         {/* Jobs Sidebar */}
         <div className="w-96 border-r border-border bg-card">
@@ -54,7 +58,7 @@ const Index = () => {
               Nhập vào công việc để xem trên bản đồ
             </p>
           </div>
-          
+
           <ScrollArea className="h-[calc(100vh-140px)]">
             <div className="p-4 space-y-3">
               {filteredJobs.map((job) => (
@@ -85,6 +89,8 @@ const Index = () => {
           />
         </div>
       </div>
+
+      <JobDetailsDialog job={selectedJob} open={open} onOpenChange={setOpen} />
     </div>
   );
 };
