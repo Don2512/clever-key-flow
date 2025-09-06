@@ -25,7 +25,17 @@ const AdminDashboard: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="h-96 rounded-lg overflow-hidden">
-            <JobMap jobs={jobsData} onJobSelect={handleJobSelect} />
+            <JobMap
+              jobs={jobsData}
+              onJobSelect={handleJobSelect}
+              getMetric={(j) => {
+                const nums = (j.salary.match(/\d+/g) || []).map(Number);
+                const max = nums.length ? Math.max(...nums) : 10;
+                return max * 100; // giả lập views theo mức lương
+              }}
+              metricLabel="Views"
+              showLegend
+            />
           </div>
         </CardContent>
       </Card>
