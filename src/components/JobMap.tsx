@@ -29,11 +29,13 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId }) => 
     // Initialize map
     mapboxgl.accessToken = 'pk.eyJ1IjoiZGFvZHV5bG9uZyIsImEiOiJjbTl5ZTQwb2cwOWw3MmpzaG5mcHE3bmszIn0.ZGTA5pi7Cp8XsHqouMkO5A';
     
+    const isDark = document.documentElement.classList.contains('dark');
+
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
+      style: isDark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/streets-v12',
       zoom: 11,
-      center: [106.6966, 10.7769], // Ho Chi Minh City coordinates
+      center: [106.6966, 10.7769],
     });
 
     // Add navigation controls
@@ -58,10 +60,10 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId }) => 
     // Add markers for each job
     jobs.forEach(job => {
       const markerElement = document.createElement('div');
-      markerElement.className = `w-8 h-8 rounded-full cursor-pointer transition-all duration-200 border-2 border-white shadow-lg ${
-        selectedJobId === job.id 
-          ? 'bg-job-marker-hover scale-110' 
-          : 'bg-job-marker hover:bg-job-marker-hover hover:scale-105'
+      markerElement.className = `w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-lg ${
+        selectedJobId === job.id
+          ? 'bg-job-marker-hover'
+          : 'bg-job-marker'
       }`;
       
       // Add company initial or job type indicator
@@ -107,10 +109,10 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId }) => 
     if (selectedJobId && map.current) {
       const selectedJob = jobs.find(job => job.id === selectedJobId);
       if (selectedJob) {
-        map.current.flyTo({
+        map.current.easeTo({
           center: selectedJob.coordinates,
           zoom: 14,
-          duration: 1000
+          duration: 0
         });
       }
     }
