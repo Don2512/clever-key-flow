@@ -2,8 +2,13 @@
 // This does NOT hide real errors; it only filters the specific noisy messages.
 if (typeof window !== 'undefined') {
   const shouldIgnore = (msg: string | undefined) =>
-    !!msg && (msg.includes('ResizeObserver loop completed with undelivered notifications') ||
-              msg.includes('ResizeObserver loop limit exceeded'));
+    !!msg && (
+      msg.includes('ResizeObserver loop completed with undelivered notifications') ||
+      msg.includes('ResizeObserver loop limit exceeded') ||
+      msg.includes('signal is aborted without reason') ||
+      msg.includes('AbortError') ||
+      msg.includes('The operation was aborted')
+    );
 
   window.addEventListener(
     'error',
