@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import SearchHeader from '@/components/SearchHeader';
 import JobMap from '@/components/JobMap';
 import JobCard from '@/components/JobCard';
+import HotJobs from '@/components/HotJobs';
 import JobDetailsDialog from '@/components/JobDetailsDialog';
 import PostJobDialog from '@/components/PostJobDialog';
 import { jobsData, Job } from '@/data/jobsData';
@@ -70,6 +71,7 @@ const Index = () => {
 
           <ScrollArea className="h-[calc(100vh-140px)]">
             <div className="p-4 space-y-3">
+              <HotJobs onSelect={handleJobSelect} />
               {filteredJobs.map((job) => (
                 <JobCard
                   key={job.id}
