@@ -15,6 +15,7 @@ const Index = () => {
   const [selectedJobId, setSelectedJobId] = useState<string | undefined>();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [open, setOpen] = useState(false);
+  const [openCreate, setOpenCreate] = useState(false);
 
   const filteredJobs = useMemo(() => {
     return jobsData.filter(job => {
