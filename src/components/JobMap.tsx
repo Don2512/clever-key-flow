@@ -30,11 +30,28 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId }) => 
     // Initialize map
     mapboxgl.accessToken = 'pk.eyJ1IjoiZGFvZHV5bG9uZyIsImEiOiJjbTl5ZTQwb2cwOWw3MmpzaG5mcHE3bmszIn0.ZGTA5pi7Cp8XsHqouMkO5A';
     
-    const isDark = document.documentElement.classList.contains('dark');
+    const osmStyle = {
+      version: 8,
+      sources: {
+        osm: {
+          type: 'raster',
+          tiles: [
+            'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+          ],
+          tileSize: 256,
+          attribution: '© OpenStreetMap contributors'
+        }
+      },
+      layers: [
+        { id: 'osm', type: 'raster', source: 'osm' }
+      ]
+    } as any;
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: isDark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/streets-v12',
+      style: osmStyle,
       zoom: 11,
       center: [106.6966, 10.7769],
     });
