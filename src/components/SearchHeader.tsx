@@ -2,6 +2,9 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, MapPin, User } from 'lucide-react';
+import { useState } from 'react';
+import LoginDialog from '@/components/LoginDialog';
+import { useAuth } from '@/lib/auth';
 
 interface SearchHeaderProps {
   jobSearch: string;
