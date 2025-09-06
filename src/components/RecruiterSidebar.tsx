@@ -7,7 +7,11 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem
+  SidebarMenuItem,
+  SidebarHeader,
+  SidebarSeparator,
+  SidebarTrigger,
+  SidebarRail
 } from '@/components/ui/sidebar';
 import { 
   BarChart3, 
@@ -54,11 +58,19 @@ export function RecruiterSidebar() {
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-primary text-primary-foreground font-medium" : "hover:bg-muted/50";
+    isActive
+      ? "bg-sidebar-accent text-primary font-semibold ring-1 ring-sidebar-border"
+      : "hover:bg-muted/50 text-foreground";
 
   return (
     <Sidebar className="w-64">
+      <SidebarRail />
       <SidebarContent>
+        <SidebarHeader className="px-3 py-2 flex items-center justify-between">
+          <span className="text-sm font-semibold">Bảng điều khiển</span>
+          <SidebarTrigger />
+        </SidebarHeader>
+        <SidebarSeparator />
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-medium text-muted-foreground px-3 py-2">
             Dashboard nhà tuyển dụng

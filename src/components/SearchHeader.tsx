@@ -2,6 +2,9 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, MapPin, User } from 'lucide-react';
+import { useState } from 'react';
+import LoginDialog from '@/components/LoginDialog';
+import { useAuth } from '@/lib/auth';
 
 interface SearchHeaderProps {
   jobSearch: string;
@@ -18,6 +21,8 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
   onLocationSearchChange,
   onSearch
 }) => {
+  const { user, logout } = useAuth();
+  const [openLogin, setOpenLogin] = useState(false);
   return (
     <header className="bg-background border-b border-border">
       <div className="px-6 py-4">
@@ -30,15 +35,20 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground">18 việc làm</span>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex items-center gap-2"
-              onClick={() => window.location.href = '/recruiter'}
-            >
-              <User className="w-4 h-4" />
-              Nhà tuyển dụng
-            </Button>
+            {!user ? (
+              <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={() => setOpenLogin(true)}>
+                <User className="w-4 h-4" /> Đăng nhập
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => (window.location.href = '/profile')}>{user.name}</Button>
+                <Button variant="outline" size="sm" onClick={() => (window.location.href = '/recruiter')}>Recruiter</Button>
+                {user.role === 'admin' && (
+                  <Button size="sm" onClick={() => (window.location.href = '/admin')}>Admin</Button>
+                )}
+                <Button variant="destructive" size="sm" onClick={logout}>Đăng xuất</Button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -61,13 +71,14 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
               className="pl-10"
             />
           </div>
-          <Button 
+          <Button
             onClick={onSearch}
             className="px-6 hover:bg-primary-hover"
           >
             Tìm kiếm
           </Button>
         </div>
+        <LoginDialog open={openLogin} onOpenChange={setOpenLogin} />
       </div>
     </header>
   );
