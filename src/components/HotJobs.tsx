@@ -47,7 +47,7 @@ const HotJobs: React.FC<HotJobsProps> = ({ onSelect }) => {
         onMouseEnter={() => (pauseRef.current = true)}
         onMouseLeave={() => (pauseRef.current = false)}
       >
-        <div className="px-2" ref={emblaRef}>
+        <div className="px-2 max-w-[350px] mx-auto" ref={emblaRef}>
           <div className="flex gap-2 py-2">
             {hot.map((job) => (
               <button
