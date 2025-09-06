@@ -42,6 +42,10 @@ const Index = () => {
     console.log('Searching for:', { jobSearch, locationSearch });
   };
 
+  const handleJobFocus = (job: Job) => {
+    setSelectedJobId(job.id);
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SearchHeader
