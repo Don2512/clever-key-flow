@@ -22,6 +22,7 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId }) => 
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<{ [key: string]: mapboxgl.Marker }>({});
+  const popups = useRef<{ [key: string]: mapboxgl.Popup }>({});
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -101,6 +102,7 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId }) => 
       });
 
       markers.current[job.id] = marker;
+      popups.current[job.id] = popup;
     });
   }, [jobs, onJobSelect, selectedJobId]);
 
@@ -109,11 +111,19 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId }) => 
     if (selectedJobId && map.current) {
       const selectedJob = jobs.find(job => job.id === selectedJobId);
       if (selectedJob) {
-        map.current.easeTo({
+        map.current.flyTo({
           center: selectedJob.coordinates,
           zoom: 14,
-          duration: 0
+          duration: 800,
+          essential: true
         });
+        Object.values(popups.current).forEach(p => p.remove());
+        const marker = markers.current[selectedJob.id];
+        const popup = popups.current[selectedJob.id];
+        if (marker && popup) {
+          marker.setPopup(popup);
+          marker.togglePopup();
+        }
       }
     }
   }, [selectedJobId, jobs]);
