@@ -19,7 +19,7 @@ const HotJobs: React.FC<HotJobsProps> = ({ onSelect }) => {
       .slice(0, 8);
   }, []);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'start', dragFree: true });
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start', dragFree: true });
   const dirRef = useRef<1 | -1>(1);
   const pauseRef = useRef(false);
 
