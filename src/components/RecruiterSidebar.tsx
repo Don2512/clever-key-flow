@@ -10,7 +10,8 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarSeparator,
-  SidebarTrigger
+  SidebarTrigger,
+  SidebarRail
 } from '@/components/ui/sidebar';
 import { 
   BarChart3, 
@@ -59,10 +60,11 @@ export function RecruiterSidebar() {
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive
       ? "bg-sidebar-accent text-primary font-semibold ring-1 ring-sidebar-border"
-      : "hover:bg-muted/50";
+      : "hover:bg-muted/50 text-foreground";
 
   return (
     <Sidebar className="w-64">
+      <SidebarRail />
       <SidebarContent>
         <SidebarHeader className="px-3 py-2 flex items-center justify-between">
           <span className="text-sm font-semibold">Bảng điều khiển</span>
