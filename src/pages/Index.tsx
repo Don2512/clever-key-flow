@@ -9,7 +9,6 @@ import { jobsData, Job } from '@/data/jobsData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import ChatbotWidget from '@/components/ChatbotWidget';
 
