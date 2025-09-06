@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,15 +10,20 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  jobs?: Job[];
 }
 
-const ChatbotWidget: React.FC = () => {
+interface ChatbotWidgetProps {
+  onPick?: (job: Job) => void;
+}
+
+const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({ onPick }) => {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([{
     id: 'welcome',
     role: 'assistant',
-    content: 'Xin chào! Tôi là trợ lý AI. Bạn muốn tìm công việc theo kỹ năng, mức lương, hay khu vực nào?'
+    content: 'Xin chào! Tôi là trợ lý AI. Bạn muốn tìm công việc theo kỹ năng, mức lương, hay khu vực nào?',
   }]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -32,55 +37,67 @@ const ChatbotWidget: React.FC = () => {
     setInput('');
     const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: text };
     const reply = createReply(text);
-    const botMsg: Message = { id: crypto.randomUUID(), role: 'assistant', content: reply };
+    const botMsg: Message = { id: crypto.randomUUID(), role: 'assistant', content: reply.text, jobs: reply.jobs };
     setMessages(prev => [...prev, userMsg, botMsg]);
   };
 
-  function createReply(text: string): string {
+  function createReply(text: string): { text: string; jobs?: Job[] } {
     const t = text.toLowerCase();
 
     // Filter by district/location
     if (t.includes('quận') || t.includes('tp') || t.includes('thành phố') || t.includes('khu vực')) {
-      const rel = jobsData.filter(j => j.location.toLowerCase().includes(t.replace('tìm', ''))).slice(0, 3);
-      if (rel.length) return formatJobs(rel, 'Các việc làm phù hợp theo khu vực:');
+      const rel = jobsData.filter(j => j.location.toLowerCase().includes(t.replace('tìm', '').trim())).slice(0, 5);
+      if (rel.length) return { text: 'Các việc làm phù hợp theo khu vực:', jobs: rel };
     }
 
     // Filter by title/skill
-    const skillMatch = jobsData.filter(j => j.title.toLowerCase().includes(t) || (j.description || '').toLowerCase().includes(t)).slice(0, 3);
-    if (skillMatch.length) return formatJobs(skillMatch, 'Gợi ý theo nội dung bạn nhập:');
+    const skillMatch = jobsData.filter(j => j.title.toLowerCase().includes(t) || (j.description || '').toLowerCase().includes(t)).slice(0, 5);
+    if (skillMatch.length) return { text: 'Gợi ý theo nội dung bạn nhập:', jobs: skillMatch };
 
     // Filter by salary number
     const salaryNums = (t.match(/\d+/g) || []).map(Number);
     if (salaryNums.length) {
       const target = Math.max(...salaryNums);
-      const rel = jobsData.filter(j => parseInt(j.salary.replace(/[^\d]/g, '')) >= target).slice(0, 3);
-      if (rel.length) return formatJobs(rel, `Các công việc mức lương từ ${target} triệu:`);
+      const rel = jobsData.filter(j => parseInt(j.salary.replace(/[^\d]/g, '')) >= target).slice(0, 5);
+      if (rel.length) return { text: `Các công việc mức lương từ ${target} triệu:`, jobs: rel };
     }
 
     // Default help
-    return 'Bạn có thể nhập: "React ở Quận 1", "lương 25", hoặc "UI/UX Bình Thạnh" để nhận gợi ý nhanh.';
-  }
-
-  function formatJobs(items: Job[], title: string) {
-    const list = items.map(j => `• ${j.title} — ${j.company} — ${j.salary} — ${j.location}`).join('\n');
-    return `${title}\n${list}`;
+    return { text: 'Bạn có thể nhập: "React ở Quận 1", "lương 25", hoặc "UI/UX Bình Thạnh" để nhận gợi ý nhanh.' };
   }
 
   const panel = (
-    <Card className="fixed bottom-28 right-6 z-50 w-80 shadow-xl border bg-background">
-      <div className="flex items-center justify-between p-3 border-b">
+    <Card className="fixed bottom-28 right-6 z-50 w-96 shadow-xl border bg-background rounded-xl">
+      <div className="flex items-center justify-between p-3 border-b bg-muted/50 rounded-t-xl">
         <div className="font-medium">Trợ lý AI</div>
         <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Đóng">
           <X className="h-4 w-4" />
         </Button>
       </div>
-      <ScrollArea className="h-64 p-3">
+      <ScrollArea className="h-80 p-3">
         <div className="space-y-3">
           {messages.map(m => (
-            <div key={m.id} className={m.role === 'user' ? 'text-right' : 'text-left'}>
-              <div className={`inline-block rounded-md px-3 py-2 text-sm ${m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
-                {m.content}
+            <div key={m.id} className="space-y-2">
+              <div className={m.role === 'user' ? 'text-right' : 'text-left'}>
+                <div className={`inline-block rounded-md px-3 py-2 text-sm ${m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
+                  {m.content}
+                </div>
               </div>
+              {m.role === 'assistant' && m.jobs && (
+                <div className="grid grid-cols-1 gap-2">
+                  {m.jobs.map(job => (
+                    <button
+                      key={job.id}
+                      onClick={() => onPick?.(job)}
+                      className="text-left rounded-md border p-2 hover:bg-accent transition-colors"
+                    >
+                      <div className="font-medium text-sm">{job.title}</div>
+                      <div className="text-xs text-muted-foreground">{job.company} • {job.location}</div>
+                      <div className="text-xs font-medium text-primary">{job.salary}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
           <div ref={bottomRef} />
