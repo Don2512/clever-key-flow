@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, MapPin, User } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import LoginDialog from '@/components/LoginDialog';
 import { useAuth } from '@/lib/auth';
 
@@ -23,6 +24,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
 }) => {
   const { user, logout } = useAuth();
   const [openLogin, setOpenLogin] = useState(false);
+  const navigate = useNavigate();
   return (
     <header className="bg-background border-b border-border">
       <div className="px-6 py-4">
@@ -41,18 +43,18 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
               </Button>
             ) : (
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => (window.location.href = '/profile')}>{user.name}</Button>
+                <Button variant="outline" size="sm" onClick={() => navigate('/profile')}>{user.name}</Button>
                 
                 {user.role === 'user' && (
-                  <Button variant="outline" size="sm" onClick={() => (window.location.href = '/profile')}>Profile</Button>
+                  <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>Dashboard</Button>
                 )}
                 
                 {user.role === 'recruiter' && (
-                  <Button variant="outline" size="sm" onClick={() => (window.location.href = '/recruiter')}>Recruiter</Button>
+                  <Button variant="outline" size="sm" onClick={() => navigate('/recruiter')}>Recruiter</Button>
                 )}
                 
                 {user.role === 'admin' && (
-                  <Button size="sm" onClick={() => (window.location.href = '/admin')}>Admin</Button>
+                  <Button size="sm" onClick={() => navigate('/admin')}>Admin</Button>
                 )}
                 
                 <Button variant="destructive" size="sm" onClick={logout}>Đăng xuất</Button>
