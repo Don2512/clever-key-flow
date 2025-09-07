@@ -42,10 +42,19 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
             ) : (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => (window.location.href = '/profile')}>{user.name}</Button>
-                <Button variant="outline" size="sm" onClick={() => (window.location.href = '/recruiter')}>Recruiter</Button>
+                
+                {user.role === 'user' && (
+                  <Button variant="outline" size="sm" onClick={() => (window.location.href = '/profile')}>Profile</Button>
+                )}
+                
+                {user.role === 'recruiter' && (
+                  <Button variant="outline" size="sm" onClick={() => (window.location.href = '/recruiter')}>Recruiter</Button>
+                )}
+                
                 {user.role === 'admin' && (
                   <Button size="sm" onClick={() => (window.location.href = '/admin')}>Admin</Button>
                 )}
+                
                 <Button variant="destructive" size="sm" onClick={logout}>Đăng xuất</Button>
               </div>
             )}
