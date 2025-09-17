@@ -16,6 +16,7 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminCompanies from "./pages/AdminCompanies";
 import AdminPosts from "./pages/AdminPosts";
 import Profile from "./pages/Profile";
+import UserDashboard from "./pages/UserDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/dashboard" element={<ProtectedRoute roles={["user", "recruiter", "admin"]}><UserDashboard /></ProtectedRoute>} />
             <Route path="/recruiter" element={<ProtectedRoute roles={["recruiter", "admin"]}><RecruiterDashboard /></ProtectedRoute>} />
             <Route path="/recruiter/jobs" element={<ProtectedRoute roles={["recruiter", "admin"]}><RecruiterJobs /></ProtectedRoute>} />
             <Route path="/recruiter/applications" element={<ProtectedRoute roles={["recruiter", "admin"]}><RecruiterApplications /></ProtectedRoute>} />
