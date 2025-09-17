@@ -40,9 +40,7 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId, getMe
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    // Initialize map
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZGFvZHV5bG9uZyIsImEiOiJjbTl5ZTQwb2cwOWw3MmpzaG5mcHE3bmszIn0.ZGTA5pi7Cp8XsHqouMkO5A';
-    
+    // Initialize map using OSM raster tiles (no Mapbox token required)
     const osmStyle = {
       version: 8,
       sources: {
@@ -62,28 +60,37 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId, getMe
       ]
     } as any;
 
-    map.current = new mapboxgl.Map({
+    const m = new mapboxgl.Map({
       container: mapContainer.current,
       style: osmStyle,
       zoom: 11,
       center: [106.6966, 10.7769],
     });
+    map.current = m;
 
     // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    m.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
     // Suppress benign abort errors from tile requests when panning/zooming
-    map.current.on('error', (e: any) => {
+    const onError = (e: any) => {
       const name = e?.error?.name || '';
       const message = e?.error?.message || '';
-      if (/AbortError/i.test(name) || /aborted/i.test(message)) {
+      if (/AbortError/i.test(name) || /aborted/i.test(message) || /The operation was aborted/i.test(message) || /signal is aborted without reason/i.test(message)) {
         e.preventDefault?.();
       }
-    });
+    };
+    m.on('error', onError);
 
     // Cleanup function
     return () => {
+      // Remove popups and markers explicitly before tearing down the map
+      Object.values(popups.current).forEach(p => p.remove());
+      Object.values(markers.current).forEach(marker => marker.remove());
+      markers.current = {};
+      popups.current = {};
+
       if (map.current) {
+        map.current.off('error', onError);
         map.current.remove();
         map.current = null;
       }
@@ -91,95 +98,119 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId, getMe
   }, []);
 
   useEffect(() => {
-    if (!map.current) return;
+    const m = map.current;
+    if (!m) return;
 
-    // Clear existing markers
-    Object.values(markers.current).forEach(marker => marker.remove());
-    markers.current = {};
+    const addMarkers = () => {
+      // Clear existing markers
+      Object.values(markers.current).forEach(marker => marker.remove());
+      markers.current = {};
+      Object.values(popups.current).forEach(p => p.remove());
+      popups.current = {};
 
-    // Add markers for each job
-    jobs.forEach(job => {
-      const markerElement = document.createElement('div');
+      // Add markers for each job
+      jobs.forEach(job => {
+        const markerElement = document.createElement('div');
 
-      // Compute size by metric when provided
-      const base = 28; // default diameter
-      let diameter = base;
-      let titleContent = job.company.charAt(0).toUpperCase();
-      let metricVal: number | undefined;
-      if (metrics) {
-        metricVal = metrics.byId[job.id];
-        const { min, max } = metrics;
-        const minD = 16, maxD = 44;
-        const span = Math.max(1, max - min);
-        diameter = Math.round(minD + ((metricVal - min) / span) * (maxD - minD));
-        titleContent = String(metricVal);
-      }
+        // Compute size by metric when provided
+        const base = 28; // default diameter
+        let diameter = base;
+        let titleContent = job.company.charAt(0).toUpperCase();
+        let metricVal: number | undefined;
+        if (metrics) {
+          metricVal = metrics.byId[job.id];
+          const { min, max } = metrics;
+          const minD = 16, maxD = 44;
+          const span = Math.max(1, max - min);
+          diameter = Math.round(minD + ((metricVal - min) / span) * (maxD - minD));
+          titleContent = String(metricVal);
+        }
 
-      markerElement.className = `rounded-full cursor-pointer border-2 border-white shadow-lg ${
-        selectedJobId === job.id
-          ? 'bg-job-marker-hover'
-          : 'bg-job-marker'
-      }`;
-      markerElement.style.width = `${diameter}px`;
-      markerElement.style.height = `${diameter}px`;
+        markerElement.className = `rounded-full cursor-pointer border-2 border-white shadow-lg ${
+          selectedJobId === job.id
+            ? 'bg-job-marker-hover'
+            : 'bg-job-marker'
+        }`;
+        markerElement.style.width = `${diameter}px`;
+        markerElement.style.height = `${diameter}px`;
 
-      // Add label
-      markerElement.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white text-[10px] font-bold">${titleContent}</div>`;
+        // Add label
+        markerElement.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white text-[10px] font-bold">${titleContent}</div>`;
 
-      markerElement.addEventListener('click', () => {
-        onJobSelect(job);
+        markerElement.addEventListener('click', () => {
+          onJobSelect(job);
+        });
+
+        const marker = new mapboxgl.Marker(markerElement)
+          .setLngLat(job.coordinates)
+          .addTo(m);
+
+        // Add popup on hover
+        const popup = new mapboxgl.Popup({
+          offset: 25,
+          closeButton: false,
+          closeOnClick: false
+        }).setHTML(`
+          <div class="p-2">
+            <h3 class="font-semibold text-sm">${job.title}</h3>
+            <p class="text-xs text-muted-foreground">${job.company}</p>
+            <p class="text-xs font-medium text-primary">${job.salary}</p>
+            ${metrics ? `<p class='text-[11px] mt-1'>${metricLabel}: <span class='font-semibold'>${metrics.byId[job.id]}</span></p>` : ''}
+          </div>
+        `);
+
+        markerElement.addEventListener('mouseenter', () => {
+          marker.setPopup(popup).togglePopup();
+        });
+
+        markerElement.addEventListener('mouseleave', () => {
+          popup.remove();
+        });
+
+        markers.current[job.id] = marker;
+        popups.current[job.id] = popup;
       });
+    };
 
-      const marker = new mapboxgl.Marker(markerElement)
-        .setLngLat(job.coordinates)
-        .addTo(map.current!);
-
-      // Add popup on hover
-      const popup = new mapboxgl.Popup({
-        offset: 25,
-        closeButton: false,
-        closeOnClick: false
-      }).setHTML(`
-        <div class="p-2">
-          <h3 class="font-semibold text-sm">${job.title}</h3>
-          <p class="text-xs text-muted-foreground">${job.company}</p>
-          <p class="text-xs font-medium text-primary">${job.salary}</p>
-          ${metrics ? `<p class='text-[11px] mt-1'>${metricLabel}: <span class='font-semibold'>${metrics.byId[job.id]}</span></p>` : ''}
-        </div>
-      `);
-
-      markerElement.addEventListener('mouseenter', () => {
-        marker.setPopup(popup).togglePopup();
-      });
-
-      markerElement.addEventListener('mouseleave', () => {
-        popup.remove();
-      });
-
-      markers.current[job.id] = marker;
-      popups.current[job.id] = popup;
-    });
-  }, [jobs, onJobSelect, selectedJobId]);
+    if (m.isStyleLoaded()) {
+      addMarkers();
+    } else {
+      m.once('load', addMarkers);
+      return () => {
+        m.off('load', addMarkers);
+      };
+    }
+  }, [jobs, onJobSelect, selectedJobId, metrics, metricLabel]);
 
   // Fly to selected job location
   useEffect(() => {
-    if (selectedJobId && map.current) {
-      const selectedJob = jobs.find(job => job.id === selectedJobId);
-      if (selectedJob) {
-        map.current.flyTo({
-          center: selectedJob.coordinates,
-          zoom: 14,
-          duration: 800,
-          essential: true
-        });
-        Object.values(popups.current).forEach(p => p.remove());
-        const marker = markers.current[selectedJob.id];
-        const popup = popups.current[selectedJob.id];
-        if (marker && popup) {
-          marker.setPopup(popup);
-          marker.togglePopup();
-        }
+    const m = map.current;
+    if (!selectedJobId || !m) return;
+
+    const selectedJob = jobs.find(job => job.id === selectedJobId);
+    if (!selectedJob) return;
+
+    const fly = () => {
+      m.flyTo({
+        center: selectedJob.coordinates,
+        zoom: 14,
+        duration: 800,
+        essential: true
+      });
+      Object.values(popups.current).forEach(p => p.remove());
+      const marker = markers.current[selectedJob.id];
+      const popup = popups.current[selectedJob.id];
+      if (marker && popup) {
+        marker.setPopup(popup);
+        marker.togglePopup();
       }
+    };
+
+    if (m.isStyleLoaded()) {
+      fly();
+    } else {
+      m.once('load', fly);
+      return () => m.off('load', fly);
     }
   }, [selectedJobId, jobs]);
 
