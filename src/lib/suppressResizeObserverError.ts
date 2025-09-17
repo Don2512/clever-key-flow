@@ -30,4 +30,14 @@ if (typeof window !== 'undefined') {
       }
     }
   );
+
+  // Filter noisy console.error logs for known benign AbortError messages
+  const origConsoleError = console.error;
+  console.error = (...args: any[]) => {
+    try {
+      const str = args.map(a => (typeof a === 'string' ? a : a?.message || '')).join(' ');
+      if (shouldIgnore(str)) return;
+    } catch {}
+    origConsoleError.apply(console, args as any);
+  };
 }
