@@ -21,6 +21,7 @@ const Index = () => {
   const [types, setTypes] = useState<string[]>([]);
   const [cats, setCats] = useState<string[]>([]);
   const [openCreate, setOpenCreate] = useState(false);
+  const [searchedLocation, setSearchedLocation] = useState<[number, number] | null>(null);
 
   const getCategory = (j: Job) => {
     const t = `${j.title} ${j.description ?? ''}`.toLowerCase();
@@ -63,8 +64,26 @@ const Index = () => {
     setOpen(true);
   };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     console.log('Searching for:', { jobSearch, locationSearch });
+    
+    if (locationSearch.trim()) {
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(locationSearch)}.json?access_token=pk.eyJ1IjoiZGFvZHV5bG9uZyIsImEiOiJjbTl5ZTQwb2cwOWw3MmpzaG5mcHE3bmszIn0.ZGTA5pi7Cp8XsHqouMkO5A&country=VN&types=place,locality,neighborhood&language=vi`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.features && data.features.length > 0) {
+            const [lng, lat] = data.features[0].center;
+            setSearchedLocation([lng, lat]);
+          }
+        }
+      } catch (error) {
+        console.error('Geocoding error:', error);
+      }
+    }
   };
 
   const handleJobFocus = (job: Job) => {
@@ -158,6 +177,7 @@ const Index = () => {
             jobs={filteredJobs}
             onJobSelect={handleJobSelect}
             selectedJobId={selectedJobId}
+            searchedLocation={searchedLocation}
           />
         </div>
       </div>

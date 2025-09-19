@@ -19,9 +19,10 @@ interface JobMapProps {
   getMetric?: (job: Job) => number; // optional metric (e.g., views) used to scale marker size
   metricLabel?: string;
   showLegend?: boolean;
+  searchedLocation?: [number, number] | null;
 }
 
-const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId, getMetric, metricLabel = 'Views', showLegend = false }) => {
+const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId, getMetric, metricLabel = 'Views', showLegend = false, searchedLocation }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<{ [key: string]: mapboxgl.Marker }>({});
@@ -214,6 +215,18 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId, getMe
       }
     }
   }, [selectedJobId, jobs]);
+
+  // Handle searched location
+  useEffect(() => {
+    if (searchedLocation && map.current) {
+      map.current.flyTo({
+        center: searchedLocation,
+        zoom: 13,
+        duration: 1000,
+        essential: true
+      });
+    }
+  }, [searchedLocation]);
 
   return (
     <div className="relative w-full h-full">
