@@ -4,7 +4,8 @@ import { RecruiterSidebar } from '@/components/RecruiterSidebar';
 import StatsCard from '@/components/StatsCard';
 import CandidatesList from '@/components/CandidatesList';
 import SimpleViewsChart from '@/components/SimpleViewsChart';
-import JobMap from '@/components/JobMap';
+import ApplicationsByJobChart from '@/components/ApplicationsByJobChart';
+import ConversionFunnel from '@/components/ConversionFunnel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,12 +20,8 @@ import {
   Home,
   Activity
 } from 'lucide-react';
-import { jobsData } from '@/data/jobsData';
 
 const RecruiterDashboard = () => {
-  const handleJobSelect = (job: any) => {
-    console.log('Selected job:', job);
-  };
 
   return (
     <SidebarProvider>
@@ -64,23 +61,6 @@ const RecruiterDashboard = () => {
           </header>
 
           <main className="flex-1 p-6 space-y-8 animate-fade-in">
-            {/* Welcome Section */}
-            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-2xl p-6 border border-primary/10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-2">
-                    Chào mừng trở lại! 👋
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Hôm nay bạn có 2 hồ sơ mới và 15 tin đang hoạt động
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 text-primary">
-                  <TrendingUp className="w-5 h-5" />
-                  <span className="font-semibold">+25% tuần này</span>
-                </div>
-              </div>
-            </div>
 
             {/* Enhanced Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -122,33 +102,11 @@ const RecruiterDashboard = () => {
               </div>
             </div>
 
-            {/* Enhanced Map Section */}
-            <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-muted/30 to-transparent border-b border-border/50">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                      <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                      Bản đồ thống kê tháng này
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Phân bố vị trí tuyển dụng và mật độ ứng viên
-                    </p>
-                  </div>
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                    Cập nhật: 5 phút trước
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="h-96 rounded-xl overflow-hidden ring-1 ring-border/20 shadow-inner">
-                  <JobMap
-                    jobs={jobsData}
-                    onJobSelect={handleJobSelect}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ApplicationsByJobChart />
+              <ConversionFunnel />
+            </div>
 
             {/* Enhanced Bottom Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
