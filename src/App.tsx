@@ -10,6 +10,7 @@ import RecruiterDashboard from "./pages/RecruiterDashboard";
 import RecruiterJobs from "./pages/RecruiterJobs";
 import RecruiterApplications from "./pages/RecruiterApplications";
 import RecruiterCandidates from "./pages/RecruiterCandidates";
+import RecruiterInterviews from "./pages/RecruiterInterviews";
 import RecruiterManage from "./pages/RecruiterManage";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/recruiter/jobs" element={<ProtectedRoute roles={["recruiter", "admin"]}><RecruiterJobs /></ProtectedRoute>} />
             <Route path="/recruiter/applications" element={<ProtectedRoute roles={["recruiter", "admin"]}><RecruiterApplications /></ProtectedRoute>} />
             <Route path="/recruiter/candidates" element={<ProtectedRoute roles={["recruiter", "admin"]}><RecruiterCandidates /></ProtectedRoute>} />
+            <Route path="/recruiter/interviews" element={<ProtectedRoute roles={["recruiter", "admin"]}><RecruiterInterviews /></ProtectedRoute>} />
             <Route path="/recruiter/manage" element={<ProtectedRoute roles={["recruiter", "admin"]}><RecruiterManage /></ProtectedRoute>} />
 
             <Route path="/admin" element={<ProtectedRoute roles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
