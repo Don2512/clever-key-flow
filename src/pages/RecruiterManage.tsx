@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import RecruiterLayout from '@/components/RecruiterLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import LocationPicker, { LocationValue } from '@/components/LocationPicker';
 
 const RecruiterManage: React.FC = () => {
+  const [address, setAddress] = useState('');
+  const [location, setLocation] = useState<LocationValue | null>(null);
   return (
     <RecruiterLayout
       title="Quản lý hồ sơ nhà tuyển dụng"
@@ -36,7 +40,38 @@ const RecruiterManage: React.FC = () => {
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="address">Địa chỉ</Label>
-              <Input id="address" placeholder="Số 1, Đường A, Quận B, TP. Hồ Chí Minh" />
+              <div className="flex gap-2">
+                <Input id="address" placeholder="Số 1, Đường A, Quận B, TP. Hồ Chí Minh" value={address} onChange={(e) => setAddress(e.target.value)} />
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button type="button" variant="secondary">Chọn trên bản đồ</Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                      <DialogTitle>Chọn địa chỉ trên bản đồ</DialogTitle>
+                    </DialogHeader>
+                    <LocationPicker
+                      value={location}
+                      onChange={(val) => {
+                        setLocation(val);
+                        if (val.address) setAddress(val.address);
+                      }}
+                      height={460}
+                    />
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button type="button" variant="outline">Đóng</Button>
+                      </DialogClose>
+                      <DialogClose asChild>
+                        <Button type="button">Sử dụng địa chỉ này</Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              {location && (
+                <p className="text-xs text-muted-foreground">Toạ độ: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}</p>
+              )}
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="about">Giới thiệu</Label>
