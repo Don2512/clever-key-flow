@@ -42,7 +42,7 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId, getMe
 
     // Initialize map
     mapboxgl.accessToken = 'pk.eyJ1IjoiZGFvZHV5bG9uZyIsImEiOiJjbTl5ZTQwb2cwOWw3MmpzaG5mcHE3bmszIn0.ZGTA5pi7Cp8XsHqouMkO5A';
-    
+
     const osmStyle = {
       version: 8,
       sources: {
@@ -115,16 +115,34 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId, getMe
         titleContent = String(metricVal);
       }
 
-      markerElement.className = `rounded-full cursor-pointer border-2 border-white shadow-lg ${
-        selectedJobId === job.id
-          ? 'bg-job-marker-hover'
-          : 'bg-job-marker'
-      }`;
-      markerElement.style.width = `${diameter}px`;
-      markerElement.style.height = `${diameter}px`;
 
       // Add label
-      markerElement.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white text-[10px] font-bold">${titleContent}</div>`;
+      let bgColor = "bg-blue-600";
+      let icon = "💼"; // default
+
+      if (job.type === "IT") {
+        bgColor = "bg-green-600";
+        icon = "💻";
+      } else if (job.type === "Finance") {
+        bgColor = "bg-yellow-500";
+        icon = "💰";
+      } else if (job.type === "Design") {
+        bgColor = "bg-pink-500";
+        icon = "🎨";
+      } else if (job.type === "Education") {
+        bgColor = "bg-purple-600";
+        icon = "📚";
+      } else if (job.type === "Health") {
+        bgColor = "bg-red-500";
+        icon = "⚕️";
+      }
+
+      markerElement.innerHTML = `
+  <div class="w-10 h-10 flex flex-col items-center justify-center ${bgColor} rounded-full shadow-lg p-2">
+    <div class="text-[20px] leading-none">${icon}</div>
+    </div>
+  </div>
+`;
 
       markerElement.addEventListener('click', () => {
         onJobSelect(job);
@@ -140,13 +158,27 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId, getMe
         closeButton: false,
         closeOnClick: false
       }).setHTML(`
-        <div class="p-2">
-          <h3 class="font-semibold text-sm">${job.title}</h3>
-          <p class="text-xs text-muted-foreground">${job.company}</p>
-          <p class="text-xs font-medium text-primary">${job.salary}</p>
-          ${metrics ? `<p class='text-[11px] mt-1'>${metricLabel}: <span class='font-semibold'>${metrics.byId[job.id]}</span></p>` : ''}
-        </div>
-      `);
+    <div class="p-3 rounded-lg shadow-md bg-white max-w-[220px]">
+      <h3 class="font-semibold text-sm text-gray-900 leading-tight">
+        ${job.title}
+      </h3>
+      <p class="text-xs text-gray-500 mt-1">
+        ${job.company}
+      </p>
+      <p class="text-xs font-medium text-primary mt-1">
+        ${job.salary}
+      </p>
+      ${metrics
+          ? `<p class="text-[11px] mt-2 text-gray-600">
+              ${metricLabel}: 
+              <span class="font-semibold text-gray-900">
+                ${metrics.byId[job.id]}
+              </span>
+            </p>`
+          : ""
+        }
+    </div>
+  `);
 
       markerElement.addEventListener('mouseenter', () => {
         marker.setPopup(popup).togglePopup();

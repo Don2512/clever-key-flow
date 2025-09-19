@@ -129,7 +129,7 @@ const Index = () => {
             </div>
           </div>
 
-          <ScrollArea className="h-[calc(100vh-140px)]">
+          <ScrollArea className="h-[calc(100vh-280px)]">
             <div className="p-4 space-y-3">
               <HotJobs onSelect={handleJobSelect} />
               {filteredJobs.map((job) => (
