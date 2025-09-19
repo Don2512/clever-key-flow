@@ -16,10 +16,11 @@ import {
 import { 
   BarChart3, 
   FileText, 
-  Users, 
-  UserCheck, 
+  Users,
+  UserCheck,
   Settings,
-  Home
+  Home,
+  Calendar
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 
@@ -39,6 +40,11 @@ const menuItems = [
     title: 'Hồ sơ nhận được',
     url: '/recruiter/applications',
     icon: Users
+  },
+  {
+    title: 'Lịch phỏng vấn',
+    url: '/recruiter/interviews',
+    icon: Calendar
   },
   {
     title: 'Ứng viên tiềm năng',
