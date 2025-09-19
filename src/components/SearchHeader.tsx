@@ -5,6 +5,7 @@ import { Search, MapPin, User } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginDialog from '@/components/LoginDialog';
+import ProfileDialog from '@/components/ProfileDialog';
 import { useAuth } from '@/lib/auth';
 
 interface SearchHeaderProps {
@@ -24,6 +25,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
 }) => {
   const { user, logout } = useAuth();
   const [openLogin, setOpenLogin] = useState(false);
+  const [openProfile, setOpenProfile] = useState(false);
   const navigate = useNavigate();
   return (
     <header className="bg-background border-b border-border">
@@ -43,7 +45,9 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
               </Button>
             ) : (
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate('/profile')}>{user.name}</Button>
+                <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={() => setOpenProfile(true)}>
+                  <User className="w-4 h-4" /> {user.name}
+                </Button>
                 
                 {user.role === 'user' && (
                   <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>Dashboard</Button>
@@ -90,6 +94,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
           </Button>
         </div>
         <LoginDialog open={openLogin} onOpenChange={setOpenLogin} />
+        <ProfileDialog open={openProfile} onOpenChange={setOpenProfile} />
       </div>
     </header>
   );
