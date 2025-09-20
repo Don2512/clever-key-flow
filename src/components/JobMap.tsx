@@ -114,36 +114,45 @@ const JobMap: React.FC<JobMapProps> = ({ jobs, onJobSelect, selectedJobId, getMe
         const span = Math.max(1, max - min);
         diameter = Math.round(minD + ((metricVal - min) / span) * (maxD - minD));
         titleContent = String(metricVal);
+        markerElement.className = `rounded-full cursor-pointer border-2 border-white shadow-lg ${selectedJobId === job.id
+          ? 'bg-job-marker-hover'
+          : 'bg-job-marker'
+          }`;
+        markerElement.style.width = `${diameter}px`;
+        markerElement.style.height = `${diameter}px`;
+        markerElement.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white text-[10px] font-bold">${titleContent}</div>`;
       }
+      else {
+        // Add label
+        let bgColor = "bg-blue-600";
+        let icon = "💼"; // default
 
+        if (job.type === "IT") {
+          bgColor = "bg-green-600";
+          icon = "💻";
+        } else if (job.type === "Finance") {
+          bgColor = "bg-yellow-500";
+          icon = "💰";
+        } else if (job.type === "Design") {
+          bgColor = "bg-pink-500";
+          icon = "🎨";
+        } else if (job.type === "Education") {
+          bgColor = "bg-purple-600";
+          icon = "📚";
+        } else if (job.type === "Health") {
+          bgColor = "bg-red-500";
+          icon = "⚕️";
+        }
 
-      // Add label
-      let bgColor = "bg-blue-600";
-      let icon = "💼"; // default
-
-      if (job.type === "IT") {
-        bgColor = "bg-green-600";
-        icon = "💻";
-      } else if (job.type === "Finance") {
-        bgColor = "bg-yellow-500";
-        icon = "💰";
-      } else if (job.type === "Design") {
-        bgColor = "bg-pink-500";
-        icon = "🎨";
-      } else if (job.type === "Education") {
-        bgColor = "bg-purple-600";
-        icon = "📚";
-      } else if (job.type === "Health") {
-        bgColor = "bg-red-500";
-        icon = "⚕️";
-      }
-
-      markerElement.innerHTML = `
+        markerElement.innerHTML = `
   <div class="w-10 h-10 flex flex-col items-center justify-center ${bgColor} rounded-full shadow-lg p-2">
     <div class="text-[20px] leading-none">${icon}</div>
     </div>
   </div>
 `;
+
+      }
+
 
       markerElement.addEventListener('click', () => {
         onJobSelect(job);

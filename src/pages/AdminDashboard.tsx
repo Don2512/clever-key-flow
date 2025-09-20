@@ -2,13 +2,13 @@ import React from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import StatsCard from '@/components/StatsCard';
 import JobMap from '@/components/JobMap';
-import SimpleViewsChart from '@/components/SimpleViewsChart';
+import SimpleViewsChart from '@/components/NewUsersBarChart';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Eye, FileText, Users, Building2 } from 'lucide-react';
 import { jobsData } from '@/data/jobsData';
 
 const AdminDashboard: React.FC = () => {
-  const handleJobSelect = () => {};
+  const handleJobSelect = () => { };
 
   return (
     <AdminLayout title="Admin Dashboard" subtitle="Tổng quan hệ thống và lược view theo bản đồ">
@@ -40,14 +40,11 @@ const AdminDashboard: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Kênh & chỉ số</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SimpleViewsChart />
-        </CardContent>
-      </Card>
+
+      <CardContent>
+        <SimpleViewsChart />
+      </CardContent>
+
     </AdminLayout>
   );
 };

@@ -3,16 +3,16 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { RecruiterSidebar } from '@/components/RecruiterSidebar';
 import StatsCard from '@/components/StatsCard';
 import CandidatesList from '@/components/CandidatesList';
-import SimpleViewsChart from '@/components/SimpleViewsChart';
+import SimpleViewsChart from '@/components/NewUsersBarChart';
 import ApplicationsByJobChart from '@/components/ApplicationsByJobChart';
 import ConversionFunnel from '@/components/ConversionFunnel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  FileText, 
-  Eye, 
+import {
+  Users,
+  FileText,
+  Eye,
   UserCheck,
   Plus,
   Settings,
@@ -27,7 +27,7 @@ const RecruiterDashboard = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-background to-muted/20">
         <RecruiterSidebar />
-        
+
         <div className="flex-1 flex flex-col">
           {/* Modern Header with Glass Effect */}
           <header className="h-20 border-b border-border/40 bg-card/80 backdrop-blur-sm px-6 flex items-center justify-between sticky top-0 z-10 shadow-sm">
@@ -117,7 +117,7 @@ const RecruiterDashboard = () => {
                 </div>
                 <CandidatesList />
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="h-1 w-8 bg-gradient-to-r from-blue-500 to-blue-500/50 rounded-full"></div>
