@@ -10,20 +10,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, UserLink } from '@/lib/auth';
+import { useNavigate } from 'react-router-dom';
 import { User, FileText, Clock, CheckCircle, XCircle, Calendar, Briefcase, TrendingUp } from 'lucide-react';
 
 const Profile: React.FC = () => {
-  const { user, updateProfile, logout, changePassword } = useAuth();
+  const { user, updateProfile, logout } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [bio, setBio] = useState(user?.bio || '');
   const [links, setLinks] = useState<UserLink[]>(user?.links && user.links.length ? user.links : [{ label: '', url: '' }]);
   const [isOpen, setIsOpen] = useState(false);
-
-  const [currentPw, setCurrentPw] = useState('');
-  const [newPw, setNewPw] = useState('');
-  const [confirmPw, setConfirmPw] = useState('');
 
   // Mock data for CV applications and interview status
   const mockApplications = [
@@ -84,20 +82,6 @@ const Profile: React.FC = () => {
   const handleRemoveLink = (idx: number) => setLinks((prev) => prev.filter((_, i) => i !== idx));
   const handleUpdateLink = (idx: number, patch: Partial<UserLink>) => setLinks((prev) => prev.map((l, i) => (i === idx ? { ...l, ...patch } : l)));
 
-  const handleChangePassword = async () => {
-    if (newPw !== confirmPw) {
-      toast({ title: 'Lỗi', description: 'Mật khẩu nhập lại không khớp.' });
-      return;
-    }
-    try {
-      await changePassword(currentPw, newPw);
-      setCurrentPw(''); setNewPw(''); setConfirmPw('');
-      toast({ title: 'Thành công', description: 'Đổi mật khẩu thành công.' });
-    } catch (e: any) {
-      toast({ title: 'Không thể đổi mật khẩu', description: e?.message || 'Vui lòng thử lại.' });
-    }
-  };
-
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -120,10 +104,9 @@ const Profile: React.FC = () => {
             </DialogHeader>
             
             <Tabs defaultValue="profile" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="profile">Thông tin cơ bản</TabsTrigger>
-                <TabsTrigger value="applications">CV đã gửi</TabsTrigger>
-                <TabsTrigger value="statistics">Thống kê</TabsTrigger>
+                <TabsTrigger value="applications">CV & Thống kê</TabsTrigger>
               </TabsList>
               
               <TabsContent value="profile" className="space-y-4">
@@ -146,7 +129,7 @@ const Profile: React.FC = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="bio">Mô t��</Label>
+                      <Label htmlFor="bio">Mô tả</Label>
                       <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Giới thiệu ngắn về bản thân, kỹ năng, mục tiêu..." />
                     </div>
 
@@ -170,79 +153,16 @@ const Profile: React.FC = () => {
                       <Button variant="destructive" onClick={logout}>
                         Đăng xuất
                       </Button>
-                      <Button onClick={handleSave}>
-                        Lưu thay đổi
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Đổi mật khẩu</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <div className="space-y-1">
-                        <Label>Mật khẩu hiện tại</Label>
-                        <Input type="password" value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} placeholder={user.passwordHash ? 'Nhập mật khẩu hiện tại' : 'Chưa đặt mật khẩu'} />
+                      <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => navigate('/change-password')}>Đổi mật khẩu</Button>
+                        <Button onClick={handleSave}>Lưu thay đổi</Button>
                       </div>
-                      <div className="space-y-1">
-                        <Label>Mật khẩu mới</Label>
-                        <Input type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} />
-                      </div>
-                      <div className="space-y-1">
-                        <Label>Nhập lại mật khẩu mới</Label>
-                        <Input type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} />
-                      </div>
-                    </div>
-                    <div className="flex justify-end">
-                      <Button onClick={handleChangePassword}>Cập nhật mật khẩu</Button>
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
               <TabsContent value="applications" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="w-5 h-5" />
-                      Danh sách CV đã gửi ({mockApplications.length})
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {mockApplications.map((app) => (
-                        <div key={app.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-lg">{app.position}</h3>
-                              <p className="text-muted-foreground">{app.company}</p>
-                              <p className="text-sm text-muted-foreground">
-                                Nộp ngày: {new Date(app.appliedDate).toLocaleDateString('vi-VN')}
-                                {app.interviewDate && (
-                                  <span className="ml-4">
-                                    Phỏng vấn: {new Date(app.interviewDate).toLocaleDateString('vi-VN')}
-                                  </span>
-                                )}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge className={`${getStatusColor(app.status)} flex items-center gap-1`}>
-                                {getStatusIcon(app.status)}
-                                {getStatusText(app.status)}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="statistics" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -306,6 +226,43 @@ const Profile: React.FC = () => {
                         />
                       </div>
                     ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="w-5 h-5" />
+                      Danh sách CV đã gửi ({mockApplications.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {mockApplications.map((app) => (
+                        <div key={app.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg">{app.position}</h3>
+                              <p className="text-muted-foreground">{app.company}</p>
+                              <p className="text-sm text-muted-foreground">
+                                Nộp ngày: {new Date(app.appliedDate).toLocaleDateString('vi-VN')}
+                                {app.interviewDate && (
+                                  <span className="ml-4">
+                                    Phỏng vấn: {new Date(app.interviewDate).toLocaleDateString('vi-VN')}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge className={`${getStatusColor(app.status)} flex items-center gap-1`}>
+                                {getStatusIcon(app.status)}
+                                {getStatusText(app.status)}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
