@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/lib/auth';
-import { User, FileText, Clock, CheckCircle, XCircle, Calendar, Briefcase, TrendingUp } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth, UserLink } from '@/lib/auth';
+import { User, FileText, Clock, CheckCircle, XCircle, Calendar, TrendingUp } from 'lucide-react';
 
 interface ProfileDialogProps {
   open: boolean;
@@ -16,10 +18,16 @@ interface ProfileDialogProps {
 }
 
 const ProfileDialog: React.FC<ProfileDialogProps> = ({ open, onOpenChange }) => {
-  const { user, updateProfile, logout } = useAuth();
+  const { user, updateProfile, logout, changePassword } = useAuth();
+  const { toast } = useToast();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [company, setCompany] = useState(user?.company || '');
+  const [bio, setBio] = useState(user?.bio || '');
+  const [links, setLinks] = useState<UserLink[]>(user?.links && user.links.length ? user.links : [{ label: '', url: '' }]);
+
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
 
   // Mock data for CV applications and interview status
   const mockApplications = [
@@ -56,7 +64,7 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({ open, onOpenChange }) => 
     switch (status) {
       case 'pending': return 'Đang chờ';
       case 'reviewing': return 'Đang xem xét';
-      case 'interview': return 'Phỏng vấn';
+      case 'interview': return 'Ph��ng vấn';
       case 'accepted': return 'Được nhận';
       case 'rejected': return 'Từ chối';
       default: return status;
@@ -69,6 +77,30 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({ open, onOpenChange }) => 
   }, {} as Record<string, number>);
 
   if (!user) return null;
+
+  const handleSave = () => {
+    const cleaned = links.filter(l => l.label || l.url);
+    updateProfile({ name, email, bio, links: cleaned });
+    toast({ title: 'Đã lưu thay đổi', description: 'Thông tin cá nhân đã được cập nhật.' });
+  };
+
+  const handleAddLink = () => setLinks((prev) => [...prev, { label: '', url: '' }]);
+  const handleRemoveLink = (idx: number) => setLinks((prev) => prev.filter((_, i) => i !== idx));
+  const handleUpdateLink = (idx: number, patch: Partial<UserLink>) => setLinks((prev) => prev.map((l, i) => (i === idx ? { ...l, ...patch } : l)));
+
+  const handleChangePassword = async () => {
+    if (newPw !== confirmPw) {
+      toast({ title: 'Lỗi', description: 'Mật khẩu nhập lại không khớp.' });
+      return;
+    }
+    try {
+      await changePassword(currentPw, newPw);
+      setCurrentPw(''); setNewPw(''); setConfirmPw('');
+      toast({ title: 'Thành công', description: 'Đổi mật khẩu thành công.' });
+    } catch (e: any) {
+      toast({ title: 'Không thể đổi mật khẩu', description: e?.message || 'Vui lòng thử lại.' });
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -105,20 +137,60 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({ open, onOpenChange }) => 
                     <Label htmlFor="email">Email</Label>
                     <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
                   </div>
-                  {user.role !== 'user' && (
-                    <div className="space-y-2">
-                      <Label htmlFor="company">Công ty</Label>
-                      <Input id="company" value={company} onChange={e => setCompany(e.target.value)} />
-                    </div>
-                  )}
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bio">Mô tả</Label>
+                  <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Giới thiệu ngắn về bản thân, kỹ năng, mục tiêu..." />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Liên kết khác</Label>
+                  <div className="space-y-2">
+                    {links.map((link, idx) => (
+                      <div key={idx} className="grid grid-cols-1 md:grid-cols-5 gap-2">
+                        <Input placeholder="Nhãn (VD: LinkedIn)" value={link.label} onChange={(e) => handleUpdateLink(idx, { label: e.target.value })} className="md:col-span-2" />
+                        <Input placeholder="URL (https://...)" value={link.url} onChange={(e) => handleUpdateLink(idx, { url: e.target.value })} className="md:col-span-3" />
+                        <div className="md:col-span-5 flex justify-end">
+                          <Button variant="ghost" size="sm" onClick={() => handleRemoveLink(idx)}>Xóa</Button>
+                        </div>
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" onClick={handleAddLink}>Thêm liên kết</Button>
+                  </div>
+                </div>
+
                 <div className="flex justify-between pt-4">
                   <Button variant="destructive" onClick={logout}>
                     Đăng xuất
                   </Button>
-                  <Button onClick={() => updateProfile({ name, email, company })}>
+                  <Button onClick={handleSave}>
                     Lưu thay đổi
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Đổi mật khẩu</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label>Mật khẩu hiện tại</Label>
+                    <Input type="password" value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} placeholder={user.passwordHash ? 'Nhập mật khẩu hiện tại' : 'Chưa đặt mật khẩu'} />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Mật khẩu mới</Label>
+                    <Input type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Nhập lại mật khẩu mới</Label>
+                    <Input type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} />
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={handleChangePassword}>Cập nhật mật khẩu</Button>
                 </div>
               </CardContent>
             </Card>
